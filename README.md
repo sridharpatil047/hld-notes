@@ -152,3 +152,91 @@
 6. Resolver caches & returns IP → Browser connects
 
 ---
+---
+
+# APIs and Scaling Challenges – delicio.us
+
+## 🧩 Exposed APIs
+
+### Authentication
+```java
+authenticate(user_id, password, meta_data)
+// Returns access token (e.g., JWT)
+```
+
+### Bookmark Operations
+```java
+createBookmark(access_token, name, url, timestamp)
+getBookmarks(access_token, noOfBookmarks, offset)
+```
+
+---
+
+## 💥 Challenges with Desktop-based Setup
+
+### Limitations at Scale
+- Works well for a few hundred/thousand users.
+- Fails at scale (1M–100M users), especially with concurrency.
+
+### Issues
+- **Single Point of Failure**: If desktop crashes or restarts, service goes down.
+- **Resource Bottlenecks**:
+  - Compute
+  - Memory
+  - Disk
+  - Network bandwidth
+
+---
+
+## 🛠️ Solutions
+
+### ✅ Addressing Failures and Bottlenecks
+
+| Problem                 | Solution       |
+|------------------------|----------------|
+| Single Point of Failure | **Replication** |
+| Resource Bottleneck     | **Sharding**    |
+
+#### Types of Sharding
+- **CPU / RAM Bottleneck** → Horizontal scaling of App Servers
+- **Disk Bottleneck** → Horizontal scaling of Database Servers
+
+---
+
+## 🧱 Scaling Types
+
+### 🔼 Vertical Scaling
+- **Definition**: Upgrade to a more powerful machine.
+- **Cluster**: A group of servers running the same code.
+
+#### 🔻 Drawbacks
+- Doesn't eliminate single point of failure.
+- Expensive (due to high-end hardware and R&D).
+- Hard to estimate future capacity.
+- No elasticity for fluctuating traffic (e.g., during festivals).
+
+---
+
+### ➕ Horizontal Scaling (Distributed Computing)
+- **Definition**: Add more machines instead of upgrading one.
+- **Works by**: Running multiple low-cost servers in parallel.
+
+#### ✅ Advantages
+- No single point of failure.
+- Cost-effective (uses commodity hardware).
+- Easier to scale incrementally.
+- Elastic: Can scale up/down based on traffic.
+
+#### 🔻 Disadvantages
+- Requires **code restructuring**.
+- Need to implement:
+  - Load balancing logic
+  - Data distribution logic
+  - Inter-service communication
+- **Consistency issues** arise (multiple data sources).
+- More architectural complexity.
+
+---
+
+### 🔍 Note
+> In CAP Theorem, Vertical Scaling aligns more with **CA (Consistency + Availability)** model.
