@@ -1,4 +1,10 @@
-# `#Day1` | Introduction to High-Level Design (HLD)
+| Day | Topics |
+|----------|----------|
+| [Day 1](#day1---introduction-to-high-level-design-hld)    | What is HLD? <br> Delicious - Steps to make website live <br> Problems(&solutions) with ICANN <br> How DNS works? <br> Scaling Types (Vertical, Horizontal) <br> Gateway x Loadbalancer |
+| [Day 2](#day2---load-balancer-configuration)    | Stateless & Statefull Loadbalancing <br> Consistent Hashing (v1 & v2) |
+
+
+# Day1 - Introduction to High-Level Design (HLD)
 
 ## 📘 What is HLD?
 
@@ -367,7 +373,7 @@ App1    App2     App3
 ---
 
 
-# `#Day2` | Load Balancer Configuration
+# Day2 - Load Balancer Configuration
 
 ## Two kinds of LB configuration
 - **Stateless Load Balancing**
