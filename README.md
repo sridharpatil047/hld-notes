@@ -362,3 +362,126 @@ App1    App2     App3
   - Round Robin
   - Least Connections
   - IP Hash
+
+
+---
+
+
+# `#Day2` | Load Balancer Configuration
+
+## Two kinds of LB configuration
+- **Stateless Load Balancing**
+- **Stateful Load Balancing**
+
+---
+
+## Stateless Load Balancing
+
+In a stateless system, all the machines are equally well equipped to respond to any query. Requests can be forwarded to any server randomly.
+
+- No stickiness: A request from the same user can go to different servers.
+- Algorithms are simple and straightforward.
+
+### Algorithms used in Stateless LB
+
+#### 1. Round Robin
+- Cycles through servers from 1 to N.
+- Equal distribution of load.
+
+#### 2. Least Response Time First
+- Prioritizes servers that respond faster.
+- Suitable when server configurations vary.
+
+### When It’s Used:
+- **Token-Based Authentication** (e.g., JWT)
+- **Microservices / RESTful APIs**
+
+#### Examples:
+1. Calculator website.
+2. Website where a shared DB is used by stateless app servers.
+
+---
+
+## Stateful Load Balancing
+
+Each session is tied to a specific server for its lifetime.
+
+- Stickiness is required.
+- Server must maintain session context.
+
+### When It’s Used:
+- **Session-Based Authentication**
+- **Sticky Sessions (Session Affinity)**
+
+#### Examples:
+1. Websites using session-based auth (e.g., PHP, Java EE).
+2. LLM chat systems like ChatGPT.
+3. City-specific weather data.
+
+### Algorithms / Strategies
+
+#### 1. HashMap-based Routing
+- `Map<user_id, server_id>`
+- Simple to implement.
+- Large memory footprint.
+- Requires stopping system when adding servers.
+
+#### 2. Modulo-based Routing
+- `user_id % number_of_servers`
+- Lightweight, no large memory.
+- Poor scalability—reshuffles all data on change.
+
+---
+
+## Consistent Hashing (v1) – Stateful LB Algorithm
+
+- Circle of numbers: 0 to 10^19.
+- Machines and users are hashed and placed on the circle.
+
+### Steps:
+
+1. Use 2 hash functions:
+   - `Hm(machine_id)` → server location
+   - `Hu(user_id)` → user location
+2. Create a sorted array mimicking the circle.
+3. Binary search on user hash to find ceiling server hash.
+
+### Benefits:
+- Efficient (O(log N)), even with thousands of servers.
+- No huge maps.
+- More stable than modulo hashing.
+
+### Problems in v1:
+
+#### Adding a server
+- Only relieves one next server of load.
+
+#### Removing a server
+- Can cause cascading failure due to load shift.
+
+---
+
+## Consistent Hashing (v2) – Enhanced
+
+### Improvements:
+- Multiple hash functions for each machine.
+- Each machine is placed at multiple positions.
+
+### Benefits:
+- Load distributed among many servers.
+- No single-point overload or cascading failures.
+- Still O(log N) time.
+- Minimal reassignments when adding/removing servers.
+
+### Collision Handling:
+- Very rare.
+- Add salt to resolve if any.
+
+### Summary:
+
+- Efficient and scalable.
+- Stateless LB: simple, good for token-based systems.
+- Stateful LB: complex, good for session or data affinity.
+- Choose algorithm based on use-case.
+
+---
