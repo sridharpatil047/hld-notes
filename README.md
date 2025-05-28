@@ -1,4 +1,4 @@
-# Introduction to High-Level Design (HLD) | `#Day1`
+# `#Day1` | Introduction to High-Level Design (HLD)
 
 ## 📘 What is HLD?
 
@@ -240,3 +240,125 @@ getBookmarks(access_token, noOfBookmarks, offset)
 
 ### 🔍 Note
 > In CAP Theorem, Vertical Scaling aligns more with **CA (Consistency + Availability)** model.
+
+---
+
+
+# Gateway / Reverse Proxy
+
+**Gateway** is the server/machine that faces the **intranet** on one side and the **Internet** on the other side.
+
+Gateway is also called a **reverse proxy**.
+
+---
+
+## Role of Gateway
+
+- Gateway is the **entry point** for any client/browser to connect to servers within the cluster.
+- The client/browser needs to know only the **Gateway’s IP address**, not all internal servers.
+- One interface of the Gateway has a **Public IP Address** and the other has a **Private IP Address**.
+- **Servers** in the cluster have **Private IPs** — external clients never contact them directly.
+
+---
+
+## Is Gateway a Single Point of Failure (SPOF)?
+
+Not necessarily — mitigation strategies:
+
+- Gateways do **not hold business logic**, they just forward traffic → **lightweight**.
+- Gateways follow:
+  - **Active-Passive** setup (Passive takes over when Active fails)
+  - **Active-Active** setup
+- Gateways use **Virtual IP Address (VIP)**:
+  - GW1 and GW2 have different physical IPs but share the same VIP.
+  - Clients connect using the **VIP**.
+
+---
+
+# Gateway vs Load Balancers
+
+- Gateway and Load Balancer are **different components**:
+
+| Gateway                     | Load Balancer                     |
+|----------------------------|------------------------------------|
+| Entry point to the cluster | Distributes load among servers     |
+| Faces the public internet  | Resides inside internal network    |
+| Performs security checks   | Uses algorithms to route traffic   |
+
+- Sometimes both are **combined in the same hardware**.
+
+---
+
+## Gateway & Load Balancer Setup
+
+- **Gateway**: Positioned at the network edge, connects internal network to internet.
+- **Load Balancer**: Distributes requests within internal network.
+
+### Flow of Traffic
+
+```
+Internet User
+     |
+     v
+-----------------------
+  Internet Gateway
+  (Public IP Address)
+-----------------------
+     |
+     v
+-----------------------
+    Load Balancer
+-----------------------
+     |
+     v
+---------------------------------
+|         |          |          |
+App1    App2      App3
+---------------------------------
+```
+
+---
+
+# Combined Gateway + Load Balancer Setup
+
+- A single **combined machine/service** can handle:
+  - Gateway functions (security, entry point)
+  - Load Balancing (distribution logic)
+
+### Pros
+
+- **Simple** and easier to manage (good for small deployments)
+- Fewer machines required
+
+### Cons
+
+- Can become a **Single Point of Failure**
+- Might not scale well for **high-traffic** apps
+
+### Flow of Traffic
+
+```
+Internet User
+     |
+     v
+-------------------------------------
+| Combined Gateway/Load Balancer   |
+|   (Public IP Address)            |
+-------------------------------------
+     |
+     v
+---------------------------------
+|        |         |         |
+App1    App2     App3
+---------------------------------
+```
+
+---
+
+# Load Balancer
+
+- **Load Balancer (LB)** distributes the load to servers in a cluster.
+- Uses algorithms like:
+  - Round Robin
+  - Least Connections
+  - IP Hash
