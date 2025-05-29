@@ -2,6 +2,7 @@
 |----------|----------|
 | [Day 1](#day1---introduction-to-high-level-design-hld)    | What is HLD? <br> Delicious - Steps to make website live <br> Problems(&solutions) with ICANN <br> How DNS works? <br> Scaling Types (Vertical, Horizontal) <br> Gateway x Loadbalancer |
 | [Day 2](#day2---load-balancer-configuration)    | Stateless & Statefull Loadbalancing <br> Consistent Hashing (v1 & v2) |
+| [Day 3](#day3)    | Decoupling Compute & Storage layer <br> Caching & Types of Caching <br> Client-Side Caching <br> CDNs <br> CDN routing strategies|
 
 
 # Day1 - Introduction to High-Level Design (HLD)
@@ -489,5 +490,178 @@ Each session is tied to a specific server for its lifetime.
 - Stateless LB: simple, good for token-based systems.
 - Stateful LB: complex, good for session or data affinity.
 - Choose algorithm based on use-case.
+
+---
+
+
+# Day3
+
+## Decoupling the Compute and Storage Layer
+
+### System Types
+
+- **Computing Systems (Application Layer / Business Logic Server):**
+  - Run business logic
+  - Hardware: High CPU, High RAM, Low Disk
+
+- **Storage Systems (Database Layer):**
+  - Store persistent data
+  - Hardware: Large Disk, Low CPU and RAM
+
+### Why Decouple?
+
+1. **Hardware Requirements Differ**
+   - Compute: CPU/RAM focused
+   - Storage: Disk-focused
+
+2. **Scale Requirements Differ**
+   - One storage machine can serve data to multiple compute servers
+
+3. **Deployment Requirements Differ**
+   - Frequent deployment on compute
+   - Coupling leads to unnecessary storage downtime
+
+### Architecture Before vs After Decoupling
+
+- **Before**: Monolithic
+- **After**: Compute and Storage communicate over network
+
+**Request-Response Flow:**
+
+Client → Gateway/LB → App Server → Storage → App Server → Gateway/LB → Client
+
+**Downside:**  
+- Extra network hop between Compute and Storage layers.
+
+---
+
+## Types of Time in a Request
+
+- **Round Trip Time (RTT)**: Client ↔ Server
+- **Compute Time**: Logic execution
+- **Network Time**: Compute ↔ Storage
+- **Database Time**: Query execution
+
+> All these times add up for one user request.
+> Real-world apps aim to make these negligible.
+
+---
+
+## Caching
+
+### What is Caching?
+
+> Storing a **copy** of **frequently used partial data** to **reduce latency**.
+
+- **COPY**: Not source of truth
+- **FREQUENTLY**: Often accessed data
+- **PARTIAL**: Only required data
+- **LATENCY**: Time to fetch
+
+> **Best Example**: DNS caching (hierarchical)
+
+---
+
+## Types of Caching
+
+### 1. Client-Side Caching
+
+#### What?
+Caching in the browser/app.
+
+#### Use Cases:
+
+- **Google Search Suggestion**
+  - First call returns 100s of results.
+  - Subsequent key strokes filtered from cache.
+  
+- **Instagram Feed**
+  - App shows cached feed on start
+  - Fetches fresh feed in background
+
+- **Slack**
+  - Profile images, names
+
+- **Cookies**
+  - Fall under client-side caching
+
+- **DNS Caching**
+  - Browser and OS level
+
+#### Optimization:
+- Send real requests only after certain characters
+- Reduce server load
+
+---
+
+### 2. Content Delivery Networks (CDNs)
+
+> **Goal**: Scale media transmission (images/videos)
+
+#### Static Media:
+- Profile pictures, post images
+- Large size, low change frequency
+
+#### Dynamic Content:
+- HTML, CSS, JS
+- Small, frequent changes
+
+#### Problems:
+1. Large size
+2. Rarely updated
+3. High load on central server
+
+#### CDN Products:
+- Akamai (OG)
+- AWS CloudFront
+- Azure FrontDoor
+- Cloudflare CDN
+- FBCDN (Facebook)
+
+#### CDN Architecture:
+- Central Server
+- Edge Servers (closer to user)
+
+#### Flow:
+1. FB uploads media + hashcode
+2. Sent to CDN central server
+3. Replicated to edge servers
+4. Users fetch from nearby edge
+
+#### Example:
+- FB URL: facebook.com/photo/?fbid=…
+- CDN URL: scontent.fblr1-7.fna.fbcdn.net/…
+- fblr = Bangalore CDN Edge Server
+
+#### CDN Eviction:
+- Remove old media if space is needed
+- If missing, fetch again from FB and cache
+
+#### Performance:
+- First 5–10% of requests slower
+- Next 90–95% are super fast
+
+---
+
+## CDN Routing Strategies
+
+### Strategy A: **Location Based**
+- FB maps user’s location to specific CDN URL
+
+### Strategy B: **Rerouting**
+- Client first hits central CDN
+- Central redirects to nearby edge server
+
+### Strategy C: **Anycast Routing**
+- Client fires requests to all edge CDNs
+- First responder is used for future requests
+
+---
+
+## Real-Life Example
+
+**Hotstar 2011 Cricket Match:**
+- Akamai CDN in India overloaded
+- Indian users routed to Singapore CDNs
 
 ---
